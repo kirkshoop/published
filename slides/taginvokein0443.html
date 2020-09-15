@@ -366,10 +366,10 @@ using namespace _name_cpo;
 ]
 .column[
 __After__
-.scale-p9[
+.scale-p8[
 ```cpp
 namespace _name_cpo {
-  inline const struct _fn {
+  inline constexpr struct _fn {
     template<typename Target, typename... Args>
       requires tag_invocable<
         _fn, Target, Args...>
@@ -514,7 +514,7 @@ class: middle
 ---
 
 ### `tag_invoke` and 'properties' satisfy those requirements
-
+.scale-p9[
 |Requirement|`tag_invoke`|'properties'|
 |--|--|--|
 |**Extensible**|define a new tag function type in a namespace|define a new traits struct in a new namespace|
@@ -522,7 +522,7 @@ class: middle
 |**Forwardable**|a `tag_invoke()` function that does not constrain the namespaced tag function argument|`require()`, `require_concept()`, `prefer()`, and `query()` functions that do not constrain the namespaced tag struct argument|
 |**Overridable**|a `tag_invoke()` function constrained to a specific namespaced tag function|`require()`, `require_concept()`, `prefer()`, and `query()` functions constrained to a specific namespaced tag struct|
 |**Defaultable** and **Ignorable**|the namespaced tag function type has an overload of `operator()` constrained with `tag_invocable<..> == false`|the namespaced tag struct overloads `require()`, `require_concept()`, `prefer()`, and `query()` hidden friend functions with the target unconstrained and constrained with `can_require<..>`, `can_require_concept<..>`, `can_prefer<..>`, and `can_query<..> == false`| 
-
+]
 ???
 
 > * 
@@ -620,14 +620,14 @@ inline constexpr struct my_function_fn {
 ---
 
 ### 'properties' has additional functionality
-
+.scale-p9[
 |function|best-guess meaning|trait members|
 |--|--|--|
 |`require`|.accent[make a new instance] of the target instance that satisfies the supplied property _iff_ the target instance does not satisfy the supplied property, otherwise return the original target instance unchanged|`is_requirable`, `polymorphic_wrapper_type`|
 |`prefer`|.accent[make a new instance] of the target instance that satisfies the supplied property _iff_ the supplied property is supported by the target and the target instance does not satisfy the supplied property, otherwise return the original target instance unchanged|`is_preferable`, `polymorphic_wrapper_type`|
 |`require_concept`|.accent[make a new instance] of a type that satisfies a concept determined by the supplied property _iff_ the target instance does not satisfy the concept determined by the supplied property, otherwise return the original target instance unchanged|`is_requirable_concept`, `polymorphic_wrapper_type`|
 |`query`|.accent[return the value] of the supplied property that this target instance satisfies|`polymorphic_query_result_type`, `static_query_v`, `value()`|
-
+]
 ???
 
 > * 
