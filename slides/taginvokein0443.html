@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>tag_invoke for cpos and properties in 0443</title>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="./fonts.css"/>
+    <link rel="stylesheet" href="./mermaid.forest.css">
+    <style>
+        @page {
+            size: 1210px 681px;
+            margin: 0;
+        }
+
+        @media print {
+            .remark-slide-scaler {
+                width: 100% !important;
+                height: 100% !important;
+                transform: scale(1) !important;
+                top: 0 !important;
+                left: 0 !important;
+            }
+        }
+
+        body { font-family: 'Droid Serif'; }
+        h1, h2, h3 {
+            font-family: 'Yanone Kaffeesatz';
+            font-weight: normal;
+        }
+        .remark-code, .remark-inline-code { font-family: 'Droid Sans Mono'; }
+        .remark-inline-code {
+          color:#585260;
+        }
+        .remark-slide-content {
+            padding-bottom: 4em;
+        }
+        div.footer {
+            position: absolute;
+            bottom: 12px;
+            width: 100%;
+            opacity: .6;
+        }
+        .footer .flexcontainer {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            margin-right: 190px;
+        }
+
+        .border {
+            border: 2px solid steelblue;
+        }
+
+        div.emscripten-output {
+            font-family: 'Droid Sans Mono';
+            font-size: 14pt;
+            border: 2px solid steelblue;
+            padding: 5px;
+            background: black;
+            color: lightgreen;
+        }
+
+        img {
+            width: 80%;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        th, td {
+            padding: 5px;
+            border: 1px solid steelblue;
+        }
+        th {
+            border-bottom: 3px solid steelblue;
+            color: black;
+        }
+        pre {
+            margin: 0.2em 0px 0.2em
+        }
+        
+        .accent {
+            color: seagreen
+        }
+        .hidden {
+            visibility: hidden
+        }
+
+        .scale-p4 {
+          transform: scale(0.4);
+          transform-origin: top left;
+        }
+
+        .scale-p5 {
+          transform: scale(0.5);
+          transform-origin: top left;
+        }
+        .scale-p75 {
+          transform: scale(0.75);
+          transform-origin: top left;
+        }
+        .scale-p8 {
+          transform: scale(0.8);
+          transform-origin: top left;
+        }
+        .scale-p9 {
+          transform: scale(0.9);
+          transform-origin: top left;
+        }
+
+        .image-10 img {width: 10%}
+        .image-20 img {width: 20%}
+        .image-30 img {width: 30%}
+        .image-40 img {width: 40%}
+        .image-50 img {width: 50%}
+        .image-60 img {width: 60%}
+        .image-70 img {width: 70%}
+        .image-80 img {width: 80%}
+
+        .column:first-of-type {float:left}
+        .column:last-of-type {float:right}
+
+        .split-30 .column:first-of-type {width: 30%}
+        .split-30 .column:last-of-type {width: 69%}
+        .split-30:after {
+          clear: both;
+          content: '';
+          display: block;
+        }
+        .split-40 .column:first-of-type {width: 40%}
+        .split-40 .column:last-of-type {width: 59%}
+        .split-40:after {
+          clear: both;
+          content: '';
+          display: block;
+        }
+        .split-50 .column:first-of-type {width: 50%}
+        .split-50 .column:last-of-type {width: 49%}
+        .split-50:after {
+          clear: both;
+          content: '';
+          display: block;
+        }
+        .split-60 .column:first-of-type {width: 60%}
+        .split-60 .column:last-of-type {width: 39%}
+        .split-60:after {
+          clear: both;
+          content: '';
+          display: block;
+        }
+        .split-70 .column:first-of-type {width: 70%}
+        .split-70 .column:last-of-type {width: 29%}
+        .split-70:after {
+          clear: both;
+          content: '';
+          display: block;
+        }
+
+        .column ul:first-of-type {
+            margin: .2em
+        }
+
+
+        blockquote {
+            background: lightgray ;
+            border-left: 10px solid deepskyblue;
+            margin: 1.5em 0px;
+            padding: 0.5em 10px;
+            quotes: "\201C""\201D""\2018""\2019";
+        }
+        blockquote:before {
+            color: #ccc;
+            font-size: 4em;
+            line-height: 0.1em;
+            margin-right: 0.25em;
+            vertical-align: -0.4em;
+        }
+        blockquote p {
+            display: inline;
+        }
+
+        .mermaid p {
+            display: inline;
+        }
+        .mermaid svg {
+          display: inline;
+          margin: auto;
+          max-height: 480px
+        }
+    </style>
+  </head>
+  <body>
+    <textarea hidden=true id="source">
+
+layout: true
+<div class="footer"><div class="flexcontainer"><span>.body[]</span><span>.center[]</span><span>.body[&copy; 2019 Kirk Shoop ([github](http://github.com/kirkshoop) [twitter](http://twitter.com/kirkshoop))]</span></div></div>
+        
+---
+
+class: middle
+
+.center[
+
+# `tag_invoke` in 0443
+
+.accent[
+### 
+]
+
+]
+.split-30[
+.column[]
+.column[
+- [D2220R0](https://github.com/kirkshoop/published/blob/master/generated/usetaginvokein443.pdf) - 
+    _redefine properties in P0443_ 
+- [D2221R0](https://github.com/kirkshoop/published/blob/master/generated/0443cpos.pdf) - 
+    _define P0443 cpos with `tag_invoke`_
+
+these papers are implemented in a fork of asio ([github](https://github.com/kirkshoop/asio/tree/execution))
+]
+]
+
+???
+
+> * 
+
+---
+
+class: middle
+
+.center[
+
+## `tag_invoke` (http://wg21.link/P1895R0)
+
+> _abstract_ .. a single ADL customization point named `tag_invoke` that takes as its
+first argument a CPO that is used as a tag to select an overload. A new CPO, `std::is_fooable(t)`,
+rather than dispatching via ADL to `is_fooable(t)`, would dispatch instead to
+`tag_invoke(std::is_fooable, t)`.
+
+.accent[
+### 
+]
+
+]
+
+???
+
+> * 
+
+---
+
+## `tag_invoke` solves two problems
+
+Creating a new CPO as described in _[customization.point.object]_ solves problems 
+related to ADL customization. There are two additional problems solved by creating 
+new CPOs in terms of `tag_invoke`
+
+|problem|description|
+|--|--|
+|.accent[identifier collisions:] | Each CPO internally dispatches via ADL to a free function of the same name, which has the effect of globally reserving that identifier (within some constraints). Two independent libraries that pick the same name for an ADL customization point still risk collision.|
+|.accent[no generic forwarding:] | There is occasionally a need to write wrapper types that ought to be transparent to customization. (Type-erasing wrappers are one such example.) With C++20's CPOs, there is no way to generically forward customizations through the transparent wrappers.|
+
+???
+
+> * 
+
+---
+class: middle
+
+.center[
+### [D2221R0](https://github.com/kirkshoop/published/blob/master/generated/0443cpos.pdf) - _define P0443 cpos with `tag_invoke`_
+
+#### .accent[changes not intended to change functionality]
+]
+
+???
+
+> * 
+
+---
+
+### [D2221R0](https://github.com/kirkshoop/published/blob/master/generated/0443cpos.pdf) - _define P0443 cpos with `tag_invoke`_
+
+#### .accent[changes to the wording of a CPO in 0443]
+
+.split-50[
+.column[
+__Before__
+
+- `O.`_`name`_`()`, if that expression is valid.
+
+- Otherwise, _`name`_`(O)`, if that expression is valid, with overload resolution performed
+  in a context that includes the declaration
+
+        void name();
+
+    and that does not include a declaration of `execution::`_`name`_.
+]
+.column[
+__After__
+
+- `tbd::tag_invoke(`_`name`_`, O)`, if that expression is valid.
+]
+]
+
+???
+
+> * 
+
+---
+
+### [D2221R0](https://github.com/kirkshoop/published/blob/master/generated/0443cpos.pdf) - _define P0443 cpos with `tag_invoke`_
+
+#### .accent[changes to the definition of a CPO in 0443]
+
+.split-50[
+.column[
+__Before__
+.scale-p4[
+```cpp
+namespace _name {
+  void name();
+
+  struct _free_fn {
+    template <typename Target, typename... Args>
+    constexpr auto operator()(
+      Target&& t, Args&&... args) const
+        noexcept(noexcept(
+          name(
+            (Target &&) t, (Args &&) args...)))
+        -> decltype(
+          name(
+            (Target &&) t, (Args &&) args...)) {
+      return name(
+        (Target &&) t, (Args &&) args...);
+    }
+  };
+  struct _member_fn {
+    template <typename Target, typename... Args>
+      requires (!std::invocable<
+        _free_fn, Target, Args...>)
+    constexpr auto operator()(
+      Target&& t, Args&&... args) const
+        noexcept(noexcept(
+          ((Target &&) t).name(
+            (Args &&) args...))) 
+        -> decltype(
+          ((Target &&) t).name(
+            (Args &&) args...)) {
+      return ((Target &&) t).name(
+        (Args &&) args...);
+    }
+  };
+  struct _fn : _free_fn, _member_fn {
+    using _free_fn::operator();
+    using _member_fn::operator();
+  };
+}  // namespace _name
+
+namespace _name_cpo {
+  inline constexpr _name::_fn name{};
+}
+using namespace _name_cpo;
+```
+]
+]
+.column[
+__After__
+.scale-p9[
+```cpp
+namespace _name_cpo {
+  inline const struct _fn {
+    template<typename Target, typename... Args>
+      requires tag_invocable<
+        _fn, Target, Args...>
+    auto operator()(
+      Target&& t, Args&& args...) const 
+        noexcept(
+          is_nothrow_tag_invocable_v<
+            _fn, Target, Args...>) ->
+        tag_invoke_result_t<
+          _fn, Target, Args...> {
+      return tbd::tag_invoke(
+        _fn{}, (Target&&)t, (Args&&)args...);
+    }
+  } name{};
+} // namespace _name
+using _name_cpo::name;
+```
+]
+]
+]
+???
+
+> * 
+
+---
+
+### [D2221R0](https://github.com/kirkshoop/published/blob/master/generated/0443cpos.pdf) - _define P0443 cpos with `tag_invoke`_
+
+#### .accent[changes to the `inline_executor` example in 0443]
+
+.split-50[
+.column[
+__Before__
+```cpp
+struct inline_executor {
+  // define execute as friend
+  template<class F>
+  friend void execute( 
+    //
+    const inline_executor&, 
+    F&& f) noexcept {
+    std::invoke(std::forward<F>(f));
+  }
+
+  // enable comparisons
+  auto operator<=>(
+    const inline_executor&) const = default;
+};
+```
+]
+.column[
+__After__
+```cpp
+struct inline_executor {
+  // define execute as friend
+  template<class F>
+  friend void tag_invoke(
+    tag_t<execution::execute>, 
+    const inline_executor&, 
+    F&& f) noexcept {
+    std::invoke(std::forward<F>(f));
+  }
+
+  // enable comparisons
+  auto operator<=>(
+    const inline_executor&) const = default;
+};
+```
+]
+]
+???
+
+> * 
+
+---
+
+## [D2221R0](https://github.com/kirkshoop/published/blob/master/generated/0443cpos.pdf) - _define P0443 cpos with `tag_invoke`_
+
+#### .accent[summary]
+
+P0443R13 defines the following cpos: `set_value`, `set_done`, `set_error`, `execute`, `connect`, `start`, `submit`, `schedule`, and `bulk_execute`.
+
+D2221R0 has the changes to P0443R13 wording needed to define these cpos in terms of `tag_invoke`.
+
+- removes the globally reserved names
+
+- adds support for generic forwarding
+
+???
+
+> * 
+
+---
+class: middle
+
+.center[
+## .accent[Any questions?]
+]
+
+???
+
+> * 
+
+---
+
+class: middle
+
+.center[
+
+## 'properties' (http://wg21.link/P1393R0)
+
+> _In general_ When the property customization mechanism is being employed for some library facility, an object’s behavior and effects on that facility in generic contexts may be determined by a set of applicable properties, and each property imposes certain requirements on that object’s behavior or exposes some attribute of that object. As well as modifying the behavior of an object, properties can be applied to an object to enforce the presence of an interface, potentially resulting in an object of a new type that satisfies some concept associated with that property.
+
+.accent[
+### 
+]
+
+]
+
+???
+
+> * 
+
+---
+
+## 'properties' were designed to satisfy requirements of executors
+
+|Requirement|Definition|
+|--|--|
+|**Extensible**|users are able to define their own|
+|**Survivable**|passing objects around does not lose information|
+|**Forwardable**|it is possible to write a catch-all that forwards to a contained object|
+|**Overridable**|it is possible to modify or block forwarding|
+|**Defaultable** and **Ignorable**|must be able to define a default when not customized and ignore when not customized|
+
+(from: https://github.com/executors/executors/issues/191)
+
+???
+
+> * 
+
+---
+
+### `tag_invoke` and 'properties' satisfy those requirements
+
+|Requirement|`tag_invoke`|'properties'|
+|--|--|--|
+|**Extensible**|define a new tag function type in a namespace|define a new traits struct in a new namespace|
+|**Survivable**|defined as overloads of the `tag_invoke()` function|defined as overloads of `require()`, `require_concept()`, `prefer()`, and `query()` functions|
+|**Forwardable**|a `tag_invoke()` function that does not constrain the namespaced tag function argument|`require()`, `require_concept()`, `prefer()`, and `query()` functions that do not constrain the namespaced tag struct argument|
+|**Overridable**|a `tag_invoke()` function constrained to a specific namespaced tag function|`require()`, `require_concept()`, `prefer()`, and `query()` functions constrained to a specific namespaced tag struct|
+|**Defaultable** and **Ignorable**|the namespaced tag function type has an overload of `operator()` constrained with `tag_invocable<..> == false`|the namespaced tag struct overloads `require()`, `require_concept()`, `prefer()`, and `query()` hidden friend functions with the target unconstrained and constrained with `can_require<..>`, `can_require_concept<..>`, `can_prefer<..>`, and `can_query<..> == false`| 
+
+???
+
+> * 
+
+---
+
+### definition
+
+.split-50[
+.column[
+__property__
+.scale-p5[
+```cpp
+struct my_property
+{
+  template<class... Ps> 
+    static constexpr bool 
+      is_applicable_property_v;
+
+  /* optional */ 
+  static constexpr bool 
+    is_requirable_concept = /* ... */;
+  
+  /* optional */ 
+  static constexpr bool 
+    is_requirable = /* ... */;
+  
+  /* optional */ 
+  static constexpr bool 
+    is_preferable = /* ... */;
+
+  /* optional */ 
+  template<class... Ps> 
+    class polymorphic_wrapper_type;
+
+  /* optional */ 
+  using 
+    polymorphic_query_result_type = /*..*/;
+
+  /* optional */ 
+  template<class T>
+    static constexpr /* ... */ 
+      static_query_v = /* ... */;
+
+  /* optional */ 
+  static constexpr /* ... */ 
+    value() const { return /* ... */; }
+};
+```
+]
+]
+.column[
+__tag_invoke function__
+
+```cpp
+inline constexpr struct my_function_fn {
+  template<typename... Tn>
+  auto operator()(Tn&&... tn) const
+    noexcept(noexcept(
+      tbd::tag_invoke(*this, (Tn&&)tn...)))
+    -> decltype(
+      tbd::tag_invoke(*this, (Tn&&)tn...)) {
+    return 
+      tbd::tag_invoke(*this, (Tn&&)tn...);
+  }
+} my_function{};
+```
+]
+]
+
+???
+
+> * 
+
+---
+
+### 'properties' has additional functionality
+
+#### .accent[Meaning]
+
+- A fixed set of functions are defined (`require`, `prefer`, `query`, `require_concept`) 
+
+- These functions are defined to have the same meaning across all properties. 
+
+- Some things are not good properties because they do not have a good mapping to the meanings available (eg. `execute()`). 
+
+- Each property author selects the subset of meanings that 'make sense' for that property.
+
+> .. each property imposes certain requirements on that object’s behavior or exposes some attribute of that object. As well as modifying the behavior of an object, properties can be applied to an object to enforce the presence of an interface, potentially resulting in an object of a new type that satisfies some concept associated with that property.
+
+???
+
+> * 
+
+---
+
+### 'properties' has additional functionality
+
+|function|best-guess meaning|trait members|
+|--|--|--|
+|`require`|.accent[make a new instance] of the target instance that satisfies the supplied property _iff_ the target instance does not satisfy the supplied property, otherwise return the original target instance unchanged|`is_requirable`, `polymorphic_wrapper_type`|
+|`prefer`|.accent[make a new instance] of the target instance that satisfies the supplied property _iff_ the supplied property is supported by the target and the target instance does not satisfy the supplied property, otherwise return the original target instance unchanged|`is_preferable`, `polymorphic_wrapper_type`|
+|`require_concept`|.accent[make a new instance] of a type that satisfies a concept determined by the supplied property _iff_ the target instance does not satisfy the concept determined by the supplied property, otherwise return the original target instance unchanged|`is_requirable_concept`, `polymorphic_wrapper_type`|
+|`query`|.accent[return the value] of the supplied property that this target instance satisfies|`polymorphic_query_result_type`, `static_query_v`, `value()`|
+
+???
+
+> * 
+
+---
+
+### 'properties' has additional functionality
+
+.scale-p9[
+|trait member|meaning|
+|-----|-------|
+|`is_applicable_property_v<T>`|`true` _iff_ `T` is allowed to support this property. In [@P0443R13] - _executors_ this is always derived from concepts|
+|`is_requirable_concept`|`true` _iff_ this property can be used with `require_concept()`|
+|`is_requirable`|`true` _iff_ this property can be used with `require()`|
+|`is_preferable`|`true` _iff_ this property can be used with `prefer()`|
+|`static_query_v<T>`|accesses the value that would be returned from a call to `query()` that is targeted on T _iff_ the value has been made available at compile-time.|
+|`value()`|provides a value that will be compared to `static_query_v<T>` to "determine whether invoking `require` or `require_concept` would result in an identity transformation." - [@P1393R0] - _properties_|
+|`polymorphic_wrapper_type<` `SupportableProperties...>`|defines the polymorphic type for a specific concept. The concept-specific expressions are built-in (like `execute()` for `any_executor<>`)|
+|`polymorphic_query_result_type`|defines the result type for `query` when used by any `polymorphic_wrapper_type<SupportableProperties...>` that has the property in `SupportableProperties...`. A wrapper, similar to `prefer_only<>`, must be used to modify the property to override `polymorphic_query_result_type`|
+]
+
+???
+
+> * 
+
+---
+
+### 'properties' has additional functionality
+
+#### .accent[Polymorphism]
+
+- `is_applicable` to potentially many concepts (eg. all the properties in P0443)
+
+- Each concept is expected to author a polymorphic type that implements that concept and supports forwarding of properties. 
+
+- Defines the polymorphic types to use when type-erasing the results of functions that operate on properties (`require`, `prefer`, `query`, and `require_concept`). 
+
+- The author of a property is unlikely to choose a polymorphic type implementation that all users of that property will find satisfying. 
+
+???
+
+> * 
+
+---
+
+### Behaviour properties in P0443R13
+
+Behaviour properties are a pattern of using nested properties and bespoke polymorphism to define a group of mutually-exclusive behaviours.
+
+#### .accent[Polymorphism]
+
+- A property `group_t` (eg. `mapping_t`) will be a value type that is _equality-comparable_ and that can be constructed from values of each of the nested property types.
+
+- Each of the nested property types are value types that are _equality-comparable_.
+
+- `group_t` will be _equality-comparable_ to the nested type that was used to construct it. The implementation of this polymorphism is unspecified - asio uses an integer and each constructor taking a nested property will set a specific value to the integer.
+
+- users and libraries cannot add additional nested behaviours to a standarized property.
+
+> open question: can any new nested behaviour type be standardized? what are the ABI implications?
+
+???
+
+> * 
+
+---
+class: middle
+
+.center[
+### [D2220R0](https://github.com/kirkshoop/published/blob/master/generated/usetaginvokein443.pdf) - _redefine properties in P0443_
+
+#### .accent[changes not intended to change functionality]
+]
+
+
+???
+
+> * 
+
+---
+
+### [D2220R0](https://github.com/kirkshoop/published/blob/master/generated/usetaginvokein443.pdf) - _redefine properties in P0443_
+
+#### .accent[move `prefer_only` to P1393 - _'properties'_]
+
+- composes with a property and blocks support for `require`. 
+
+- used to allow a polymorphic type to support a property 'optionally'. 
+
+- nothing to do with executors
+
+???
+
+> * 
+
+---
+
+### [D2220R0](https://github.com/kirkshoop/published/blob/master/generated/usetaginvokein443.pdf) - _redefine properties in P0443_
+
+#### .accent[remove `any_executor`]
+
+- There is an implementation of `any_ref<>`, with `tag_invoke` forwarding, in my changes to asio ([github](https://github.com/kirkshoop/asio/tree/execution)) that works to construct `any_executor<>` as a templated type alias.
+
+- Polymorphism for `tag_invoke` functions is a separate concern from both `tag_invoke` and executors.
+
+- There will be several `any_` types for `tag_invoke` (eg. `any_value`, `any_ref`, `any_unique`, `any_shared`, etc..)
+
+???
+
+> * 
+
+---
+### [D2220R0](https://github.com/kirkshoop/published/blob/master/generated/usetaginvokein443.pdf) - _redefine properties in P0443_
+
+#### .accent[naming functions]
+
+| query | requires | prefer | | function |
+|--|--|--|--:|--|
+| `query(t, ` `allocator)` | `requires(t, ` `allocator(a))` | `prefer(t, ` `allocator(a))` | vs |`get_allocator(t)` & `make_with_allocator(` `t, a)`|
+
+???
+
+> * 
+
+---
+### [D2220R0](https://github.com/kirkshoop/published/blob/master/generated/usetaginvokein443.pdf) - _redefine properties in P0443_
+
+#### .accent[naming behaviours]
+
+| requires | prefer | | behaviour |
+|--|--|--:|--|
+| `requires(t, ` `mapping.thread)` | `prefer(t, ` `mapping.thread)` | vs | `make_with_mapping(t, ` `thread_mapping)` |
+| `requires(t, ` `mapping.new_thread)` | `prefer(t, ` `mapping.new_thread)` | vs | `make_with_mapping(t, ` `new_thread_mapping)` |
+| `requires(t, ` `mapping.other)` | `prefer(t, ` `mapping.other)` | vs | `make_with_mapping(t, ` `other_mapping)` |
+
+???
+
+> * 
+
+---
+
+### [D2220R0](https://github.com/kirkshoop/published/blob/master/generated/usetaginvokein443.pdf) - _redefine properties in P0443_
+
+#### .accent[usage example from P0443R13]
+
+.split-50[
+.column[
+__Before__
+.scale-p9[
+```cpp
+// obtain an executor
+executor auto ex = ...;
+
+// require the execute operation to block
+executor auto blocking_ex = 
+  std::require(
+    ex, execution::blocking.always);
+
+// prefer to execute with a particular 
+// priority p
+executor auto blocking_ex_with_priority = 
+  std::prefer(
+    blocking_ex, execution::priority(p));
+
+// execute my blocking, possibly prioritized 
+// work
+execution::execute(
+  blocking_ex_with_priority, work);
+```
+]
+]
+.column[
+__After__
+.scale-p9[
+```cpp
+// obtain an executor
+executor auto ex = ...;
+
+// require the execute operation to block 
+executor auto blocking_ex = 
+  execution::make_with_blocking(
+    ex, execution::always_blocking);
+
+// prefer to execute with a particular 
+// priority p
+executor auto blocking_ex_with_priority = 
+  tbd::prefer(execution::make_with_priority, 
+    blocking_ex, p);
+
+// execute my blocking, possibly prioritized
+// work
+execution::execute(
+  blocking_ex_with_priority, work);
+```
+]
+]
+]
+
+???
+
+> * 
+
+---
+
+### [D2220R0](https://github.com/kirkshoop/published/blob/master/generated/usetaginvokein443.pdf) - _redefine properties in P0443_
+
+#### .accent[redefine properties in P0443R13]
+
+|before|after|
+|--|--|
+|`context_t`|`get_context()`|
+|`blocking_t`|`get_blocking()`, `make_with_blocking()`|
+|`blocking_t::possibly_t`|`possibly_blocking_t`|
+|`blocking_t::always_t`|`always_blocking_t`|
+|`blocking_t::never_t`|`never_blocking_t`|
+|`relationship_t`|`get_relationship()`, `make_with_relationship()`|
+|`relationship_t` `::continuation_t`|`continuation_relationship_t`|
+|`relationship_t::fork_t`|`fork_relationship_t`|
+
+???
+
+> * 
+
+---
+
+### [D2220R0](https://github.com/kirkshoop/published/blob/master/generated/usetaginvokein443.pdf) - _redefine properties in P0443_
+
+#### .accent[redefine properties in P0443R13]
+
+|before|after|
+|--|--|
+|`outstanding_work_t`|`get_outstanding_work()`, `make_with_outstanding_work()`|
+|`outstanding_work_t` `::untracked_t`|`untracked_outstanding_work_t`|
+|`outstanding_work_t` `::tracked_t`|`tracked_outstanding_work_t`|
+|`mapping_t`|`get_mapping()`, `make_with_mapping()`|
+|`mapping_t::thread_t`|`thread_mapping_t`|
+|`mapping_t::new_thread_t`|`new_thread_mapping_t`|
+|`mapping_t::other_t`|`other_mapping_t`|
+|`allocator_t<Allocator>`|`get_allocator()`, `make_with_allocator()`|
+
+???
+
+> * 
+
+---
+class: middle
+
+.center[
+## .accent[Any Questions?]
+]
+
+???
+
+> * 
+
+---
+
+???
+
+> * 
+
+
+    </textarea>
+    <!-- <script src="https://gnab.github.io/remark/downloads/remark-latest.min.js" type="text/javascript" >
+    </script> -->
+    <script src="./remark-latest.min.js" type="text/javascript" >
+    </script>
+    <script src="./CustomElements.min.js" type="text/javascript" >
+    </script>
+    <script src="./element.js" type="text/javascript" >
+    </script>
+    <script src="./mermaid.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML&delayStartupUntil=configured" type="text/javascript" >
+    </script>
+    <script>
+
+        var slideshow = remark.create({
+            ratio: "16:9",
+            highlightLanguage: "cpp",
+            highlightStyle: "atelier-cave-light",
+            highlightLines: true,
+            highlightSpans: true
+        });
+
+        MathJax.Hub.Config({
+            displayAlign: "center",
+            tex2jax: {
+                skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+                inlineMath: [['$','$'], ['\\(','\\)']]
+            }
+        });
+        MathJax.Hub.Configured();
+
+        mermaid.initialize({
+          mermaid: {
+            startOnLoad: false,
+            cloneCssStyles: false
+          }
+        });
+
+        function initMermaid(slide) {
+          try {
+            mermaid.init(undefined, '.remark-visible .mermaid p');
+          } catch(e) {
+            console.log(e);
+          }
+        }
+        initMermaid(slideshow.getSlides()[slideshow.getCurrentSlideIndex()]);
+
+        slideshow.on("afterShowSlide", function(slide) {
+            initMermaid(slide);
+        });
+        slideshow.on("print", function(slide) {
+            initMermaid(slide);
+        });
+    </script>
+      </body>
+</html>
